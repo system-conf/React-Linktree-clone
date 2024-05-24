@@ -89,7 +89,7 @@ const Home = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container container-home">
       <h1 className="barmen-header">Barmen Hesaplayıcı</h1>
       <div className="productRow">
         <label htmlFor="kabuk" className="label marginsifir">

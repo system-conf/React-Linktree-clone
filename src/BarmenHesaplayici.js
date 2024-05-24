@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "./BarmenHesaplayici.css";
+import { getDatabase, ref, set } from "firebase/database";
 
 const BarmenHesaplayici = ({ darkMode }) => {
   const [newProducts, setNewProducts] = useState({});
   const [productName, setProductName] = useState("");
   const [productAmount, setProductAmount] = useState("");
   const [productUnit, setProductUnit] = useState("gram");
-  const [total, setTotal] = useState(0);
+  const [recipeName, setRecipeName] = useState("");
+  const [totals, setTotals] = useState({ gram: 0, ml: 0, cl: 0 });
 
   useEffect(() => {}, [darkMode]);
 
@@ -40,7 +42,6 @@ const BarmenHesaplayici = ({ darkMode }) => {
   };
 
   const updateValues = (factor, source) => {
-    let total = 0;
     const updatedProducts = { ...newProducts };
     for (const key in newProducts) {
       if (source !== key) {
@@ -48,10 +49,9 @@ const BarmenHesaplayici = ({ darkMode }) => {
           newProducts[key].initial * factor
         ).toFixed(2);
       }
-      total += parseFloat(updatedProducts[key].value) || 0;
     }
-    setTotal(total);
     setNewProducts(updatedProducts);
+    updateTotal(updatedProducts);
   };
 
   const resetValues = () => {
@@ -64,11 +64,13 @@ const BarmenHesaplayici = ({ darkMode }) => {
   };
 
   const updateTotal = (products) => {
-    let total = 0;
+    const totals = { gram: 0, ml: 0, cl: 0 };
     for (const key in products) {
-      total += parseFloat(products[key].value || products[key].initial) || 0;
+      const unit = products[key].unit;
+      const value = parseFloat(products[key].value || products[key].initial) || 0;
+      totals[unit] += value;
     }
-    setTotal(total);
+    setTotals(totals);
   };
 
   const increaseAmount = (productId) => {
@@ -100,6 +102,20 @@ const BarmenHesaplayici = ({ darkMode }) => {
     delete updatedProducts[productId];
     setNewProducts(updatedProducts);
     updateTotal(updatedProducts);
+  };
+
+  const saveRecipe = () => {
+    if (recipeName) {
+      const db = getDatabase();
+      set(ref(db, 'recipes/' + recipeName), {
+        products: newProducts,
+        totals: totals,
+      });
+      setRecipeName("");
+      alert("Reçete başarıyla kaydedildi!");
+    } else {
+      alert("Lütfen bir reçete ismi girin.");
+    }
   };
 
   return (
@@ -189,7 +205,27 @@ const BarmenHesaplayici = ({ darkMode }) => {
       </div>
       <div className="totals">
         <h2>Genel Toplam</h2>
-        <p id="genel_toplam">Toplam Miktar: {total.toFixed(2)}</p>
+        <p id="genel_toplam">Toplam Gram: {totals.gram.toFixed(2)}</p>
+        <p id="genel_toplam">Toplam ML: {totals.ml.toFixed(2)}</p>
+        <p id="genel_toplam">Toplam CL: {totals.cl.toFixed(2)}</p>
+      </div>
+      <div>
+        <h2 className="subHeader">Reçete Kaydet</h2>
+        <label htmlFor="recete_isim" className="label">
+          Reçete İsmi:
+        </label>
+        <input
+          placeholder="Reçete ismi"
+          type="text"
+          id="recete_isim"
+          value={recipeName}
+          onChange={(e) => setRecipeName(e.target.value)}
+          className="input"
+        />
+        <br />
+        <button onClick={saveRecipe} className="button">
+          Kaydet
+        </button>
       </div>
     </div>
   );

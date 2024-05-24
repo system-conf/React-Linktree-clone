@@ -1,6 +1,5 @@
 .container {
     font-family: "Arial", sans-serif;
-  
     padding: 20px;
     margin: auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -129,6 +128,12 @@
     .container {
       padding: 20px;
       box-shadow: none;
+    }
+
+    .container-home {
+      padding: 20px;
+      box-shadow: none;
+      height: 88vh;
     }
   
     .label,
